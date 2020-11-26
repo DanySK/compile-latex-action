@@ -22,7 +22,7 @@ runs:
   steps: 
     - shell: bash
       run: |
-        find ${GITHUB_WORKSPACE:-~} -type f -name '*.tex' -print0 | \
+        find ${GITHUB_WORKSPACE:-/} -type f -name '*.tex' -print0 | \
         xargs -0 grep -lPv '\s*%\s*\!\s*TeX\s*root' {} | \
         tr '\n' '\0' | \
         xargs -0 sh -c \
