@@ -1,0 +1,29 @@
+name: 'Compile LaTeX'
+description: 'Searches all tex files and compiles them'
+inputs:
+  compile-command:
+    description: The command to invoke to compile. Defaults to 'pdflatex -shell-escape -synctex=1 -interaction=nonstopmode -halt-on-error'
+    required: true
+    default: pdflatex -shell-escape -synctex=1 -interaction=nonstopmode -halt-on-error
+  bibtex-enabled:
+    description: 'Whether to run a pass on bibliography'
+    required: true
+    default: true
+  bibtex-command:
+    description: The command to invoke to compile the bibliography. Defaults to bibtex.
+    required: true
+    default: bibtex
+outputs:
+  random-number: 
+    description: "Random number"
+    value: ${{ steps.random-number-generator.outputs.random-id }}
+runs:
+  using: "composite"
+  steps: 
+    - shell: bash
+      run: |
+        find ${GITHUB_WORKSPACE:-~} -type f -name '*.tex' -print0 | \
+        xargs -0 grep -lPv '\s*%\s*\!\s*TeX\s*root' {} | \
+        tr '\n' '\0' | \
+        xargs -0 sh -c \
+        'for arg do cd "${arg%/*}"; ${{ inputs.compile-command }} "$arg"; if ${{ inputs.bibtex-enabled }}; then ${{ inputs.bibtex-command }} "${arg%.*}.aux"; ${{ inputs.compile-command }} "$arg"; fi; done' _
