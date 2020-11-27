@@ -70,8 +70,13 @@ runs:
               || (echo "$file" >> "${{ inputs.current-failure-list}}")
           done <"${{ inputs.failure-list }}"
         done
-        echo 'Done. Files corrrectly compiled:'
-        cat "${{ inputs.success-list}}"
+        echo 'Done.'
+        if [ -f "${{ inputs.success-list}}" ]; then
+          echo 'Files correctly compiled:'
+          cat "${{ inputs.success-list}}"
+        else
+          echo 'No successful compilations'
+        fi
         if [ -f "${{ inputs.current-failure-list }}" ] && [ ! -s "${{ inputs.current-failure-list }}" ]; then
           echo 'Failures:'
           cat "${{ inputs.current-failure-list}}"
