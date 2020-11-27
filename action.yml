@@ -8,7 +8,7 @@ inputs:
   compile-list:
     description: A file used internally. Modify if it clashes with some file of yours.
     required: true
-    default: compile_list
+    default: compile-list
   failure-list:
     description: A file used internally. Modify if it clashes with some file of yours.
     required: true
@@ -16,7 +16,7 @@ inputs:
   success-list:
     description: A file registering all the successful compilations. Modify if it clashes with some file of yours. Use it to identify files to deploy.
     required: true
-    default: success_list
+    default: success-list
   current-failure-list:
     description: A file used internally. Modify if it clashes with some file of yours.
     required: true
