@@ -51,28 +51,28 @@ runs:
     - shell: bash
       run: touch ${{ inputs.failure-list }}
     - shell: bash
-      run: cp ${{ inputs.compile-list }} ${{ inputs.current-failure-list }}
+      run: cp "${{ inputs.compile-list }}" "${{ inputs.current-failure-list }}"
     - shell: bash
       run: |
-        until \
-          [ ! -f ${{ inputs.current-failure-list }} ] \
-          || [ -s ${{ inputs.current-failure-list }} ] \
-          || diff <(sort "${{ inputs.failure-list }}") <(sort "${{ inputs.current-failure-list }}") ;\
+        while \
+          [ -f "${{ inputs.current-failure-list }}" ] \
+          && [ -s "${{ inputs.current-failure-list }}" ] \
+          && ! diff <(sort "${{ inputs.failure-list }}") <(sort "${{ inputs.current-failure-list }}") ;\
         do
           echo 'There is still work to do. Trying to compile:'
-          cp ${{ inputs.current-failure-list }} ${{ inputs.failure-list }}
-          rm ${{ inputs.current-failure-list }}
-          cat ${{ inputs.failure-list }}
+          cp "${{ inputs.current-failure-list }}" "${{ inputs.failure-list }}"
+          rm "${{ inputs.current-failure-list }}"
+          cat "${{ inputs.failure-list }}"
           while IFS= read -r file; do
             echo "Running ${{ inputs.compile-command }} $file"
             ${{ inputs.compile-command }} "$file" \
               && (echo "$file" >> "${{ inputs.success-list}}") \
               || (echo "$file" >> "${{ inputs.current-failure-list}}")
-          done <${{ inputs.failure-list }}
+          done <"${{ inputs.failure-list }}"
         done
         echo 'Done. Files corrrectly compiled:'
         cat "${{ inputs.success-list}}"
-        if [ -f ${{ inputs.current-failure-list }} ] && [ ! -s ${{ inputs.current-failure-list }} ]; then
+        if [ -f "${{ inputs.current-failure-list }}" ] && [ ! -s "${{ inputs.current-failure-list }}" ]; then
           echo 'Failures:'
           cat "${{ inputs.current-failure-list}}"
           exit 1
