@@ -1,18 +1,26 @@
 name: 'Compile LaTeX'
-description: 'Searches all tex files and compiles them'
+description: 'Searches all tex files and compiles them via Rubber'
 inputs:
   compile-command:
-    description: The command to invoke to compile. Defaults to 'pdflatex -shell-escape -synctex=1 -interaction=nonstopmode -halt-on-error'
+    description: The command to invoke to compile. Defaults to 'rubber --inplace -d --synctex -s'
     required: true
-    default: pdflatex -shell-escape -synctex=1 -interaction=nonstopmode -halt-on-error
-  bibtex-enabled:
-    description: 'Whether to run a pass on bibliography'
+    default: rubber --inplace -d --synctex -s
+  compile-list:
+    description: A file used internally. Modify if it clashes with some file of yours.
     required: true
-    default: true
-  bibtex-command:
-    description: The command to invoke to compile the bibliography. Defaults to bibtex.
+    default: compile_list
+  failure-list:
+    description: A file used internally. Modify if it clashes with some file of yours.
     required: true
-    default: bibtex
+    default: failure-list
+  success-list:
+    description: A file used internally. Modify if it clashes with some file of yours.
+    required: true
+    default: success_list
+  current-failure-list:
+    description: A file used internally. Modify if it clashes with some file of yours.
+    required: true
+    default: current-failure-list
 outputs:
   random-number: 
     description: "Random number"
@@ -21,9 +29,50 @@ runs:
   using: "composite"
   steps: 
     - shell: bash
+      run: sudo apt-get install -y rubber
+    # Note: grep will likely fail some matches, so there must be a || true around the command
+    - shell: bash
       run: |
-        find ${GITHUB_WORKSPACE:-/} -type f -name '*.tex' -print0 | \
-        xargs -0 grep -lPv '\s*%\s*\!\s*TeX\s*root' {} | \
-        tr '\n' '\0' | \
-        xargs -0 sh -c \
-        'for arg do cd "${arg%/*}"; ${{ inputs.compile-command }} "$arg"; if ${{ inputs.bibtex-enabled }}; then ${{ inputs.bibtex-command }} "${arg%.*}.aux"; ${{ inputs.compile-command }} "$arg"; fi; done' _
+        (find ${GITHUB_WORKSPACE:-/} -type f -name '*.tex' -print0 | \
+            xargs -0 grep -lPv '\s*%\s*\!\s*TeX\s*root' {} | \
+            tee "${{ inputs.compile-list }}") || true
+    - shell: bash
+      run: |
+        echo The following files have been detected as LaTeX roots. If some are not, you can add a magic comment '%!TeX root = ...' to make this action skip them
+        cat "${{ inputs.compile-list }}"
+    # Strategy
+    # while the contents of current-failure-list and failure-list are different and failure-list is not empty
+    # replace failure-list with current-failure-list
+    # delete current-failure-list
+    # for each file in failure list run the compilation
+    # if it is successful, append to success_list
+    # if it fails, append to current-failure-list
+    # if failure-list is not empty, log successes, failures, and fail
+    - shell: bash
+      run: touch ${{ inputs.current-failure-list }}
+    - shell: bash
+      run: cp ${{ inputs.compile-list }} ${{ inputs.failure-list }}
+    - shell: bash
+      run: |
+        until \
+          [ ! -f ${{ inputs.current-failure-list }} ] \
+          || [ -s ${{ inputs.current-failure-list }} ] \
+          || diff <(sort "${{ inputs.failure-list }}") <(sort "${{ inputs.current-failure-list }}") ;\
+        do
+          cp ${{ inputs.current-failure-list }} ${{ inputs.failure-list }}
+          rm ${{ inputs.current-failure-list }}
+          while IFS= read -r file; do
+              ${{ inputs.compile-command }} "$file" \
+                && (echo "$file" >> "${{ inputs.success-list}}") \
+                || (echo "$file" >> "${{ inputs.current-failure-list}}")
+            fi
+          done <${{ inputs.failure-list }}
+        done
+        echo 'Files corrrectly compiled:'
+        cat "${{ inputs.success-list}}"
+        if [ -f ${{ inputs.current-failure-list }} ] && [ ! -s ${{ inputs.current-failure-list }} ]; then
+          echo 'Failures:'
+          cat "${{ inputs.current-failure-list}}"
+          exit 1
+        fi
+        exit 0
