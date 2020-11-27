@@ -4,7 +4,7 @@ inputs:
   compile-command:
     description: The command to invoke to compile. Defaults to 'rubber --inplace -d --synctex -s'
     required: true
-    default: rubber --inplace -d --synctex -s
+    default: rubber --unsafe --inplace -d --synctex -s
   compile-list:
     description: A file used internally. Modify if it clashes with some file of yours.
     required: true
@@ -14,17 +14,13 @@ inputs:
     required: true
     default: failure-list
   success-list:
-    description: A file used internally. Modify if it clashes with some file of yours.
+    description: A file registering all the successful compilations. Modify if it clashes with some file of yours. Use it to identify files to deploy.
     required: true
     default: success_list
   current-failure-list:
     description: A file used internally. Modify if it clashes with some file of yours.
     required: true
     default: current-failure-list
-outputs:
-  random-number: 
-    description: "Random number"
-    value: ${{ steps.random-number-generator.outputs.random-id }}
 runs:
   using: "composite"
   steps: 
@@ -73,13 +69,13 @@ runs:
         echo 'Done.'
         if [ -f "${{ inputs.success-list}}" ]; then
           echo 'Files correctly compiled:'
-          cat "${{ inputs.success-list}}"
+          cat "${{ inputs.success-list }}"
         else
           echo 'No successful compilations'
         fi
         if [ -f "${{ inputs.current-failure-list }}" ] && [ ! -s "${{ inputs.current-failure-list }}" ]; then
           echo 'Failures:'
-          cat "${{ inputs.current-failure-list}}"
+          cat "${{ inputs.current-failure-list }}"
           exit 1
         fi
         exit 0
