@@ -62,10 +62,9 @@ runs:
           cp ${{ inputs.current-failure-list }} ${{ inputs.failure-list }}
           rm ${{ inputs.current-failure-list }}
           while IFS= read -r file; do
-              ${{ inputs.compile-command }} "$file" \
-                && (echo "$file" >> "${{ inputs.success-list}}") \
-                || (echo "$file" >> "${{ inputs.current-failure-list}}")
-            fi
+            ${{ inputs.compile-command }} "$file" \
+              && (echo "$file" >> "${{ inputs.success-list}}") \
+              || (echo "$file" >> "${{ inputs.current-failure-list}}")
           done <${{ inputs.failure-list }}
         done
         echo 'Files corrrectly compiled:'
