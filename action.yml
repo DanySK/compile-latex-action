@@ -33,8 +33,8 @@ runs:
     # Note: grep will likely fail some matches, so there must be a || true around the command
     - shell: bash
       run: |
-        (find ${GITHUB_WORKSPACE:-/} -type f -name '*.tex' -print0 | \
-            xargs -0 grep -lPv '\s*%\s*\!\s*TeX\s*root' {} | \
+        (find "${GITHUB_WORKSPACE:-/}" -type f -name '*.tex' -print0 | \
+            xargs -0 grep -lPv '\s*%\s*\!\s*TeX\s*root' | \
             tee "${{ inputs.compile-list }}") || true
     - shell: bash
       run: |
@@ -59,15 +59,18 @@ runs:
           || [ -s ${{ inputs.current-failure-list }} ] \
           || diff <(sort "${{ inputs.failure-list }}") <(sort "${{ inputs.current-failure-list }}") ;\
         do
+          echo 'There is still work to do. Trying to compile:'
           cp ${{ inputs.current-failure-list }} ${{ inputs.failure-list }}
           rm ${{ inputs.current-failure-list }}
+          cat ${{ inputs.failure-list }}
           while IFS= read -r file; do
+            echo "Running ${{ inputs.compile-command }} $file"
             ${{ inputs.compile-command }} "$file" \
               && (echo "$file" >> "${{ inputs.success-list}}") \
               || (echo "$file" >> "${{ inputs.current-failure-list}}")
           done <${{ inputs.failure-list }}
         done
-        echo 'Files corrrectly compiled:'
+        echo 'Done. Files corrrectly compiled:'
         cat "${{ inputs.success-list}}"
         if [ -f ${{ inputs.current-failure-list }} ] && [ ! -s ${{ inputs.current-failure-list }} ]; then
           echo 'Failures:'
