@@ -73,7 +73,7 @@ runs:
               echo "Current failure list:"
               cat "${{ inputs.current-failure-list }}"
             fi
-            if [ ! -f "${{ inputs.success-list }}" ] || [ ! -f "${{ inputs.current-failure-list }}" ]; then
+            if [ ! -f "${{ inputs.success-list }}" ] && [ ! -f "${{ inputs.current-failure-list }}" ]; then
               echo 'Something is wrong, a compilation has been executed but no success nor failure has been registered'
               exit 2
             fi
