@@ -1,4 +1,4 @@
-name: 'Compile LaTeX'
+name: 'Compile All LaTeX'
 description: 'Searches all tex files and compiles them via Rubber'
 inputs:
   compile-command:
