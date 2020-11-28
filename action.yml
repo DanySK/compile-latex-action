@@ -33,7 +33,7 @@ runs:
     - shell: bash
       run: |
         (find "${GITHUB_WORKSPACE:-/}" -type f -name '*.tex' -print0 | \
-            xargs -0 grep -lPv '\s*%\s*\!\s*TeX\s*root' | \
+            xargs -0 grep -PiL '\s*%\s*\!\s*TeX\s*root.*' | \
             tee "${{ inputs.compile-list }}") || true
     - shell: bash
       run: |
