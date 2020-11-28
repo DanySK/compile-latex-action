@@ -1,5 +1,8 @@
 name: 'Compile All LaTeX'
 description: 'Searches all tex files and compiles them via Rubber'
+branding:
+  icon: book-open
+  color: orange
 inputs:
   compile-command:
     description: The command to invoke to compile. Defaults to 'rubber --inplace -d --synctex -s'
