@@ -29,6 +29,11 @@ jobs:
       # Checkout the repository
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Fetch tags
+        shell: bash
+        run: git fetch --tags -f
       - name: Install TeXLive
         uses: DanySK/setup-texlive-action@master
       - name: Compile LaTeX
