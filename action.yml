@@ -54,9 +54,8 @@ runs:
     - shell: bash
       run: |
         while \
-          [ -f "${{ inputs.current-failure-list }}" ] \
-          && [ -s "${{ inputs.current-failure-list }}" ] \
-          && ! diff <(sort "${{ inputs.failure-list }}") <(sort "${{ inputs.current-failure-list }}") ;\
+          [ -s "${{ inputs.current-failure-list }}" ] \
+          && ! diff <(sort "${{ inputs.failure-list }}" | uniq) <(sort "${{ inputs.current-failure-list }}" | uniq) ;\
         do
           echo 'There is still work to do. Trying to compile:'
           cp "${{ inputs.current-failure-list }}" "${{ inputs.failure-list }}"
@@ -86,7 +85,7 @@ runs:
         else
           echo 'No successful compilations'
         fi
-        if [ -f "${{ inputs.current-failure-list }}" ] && [ ! -s "${{ inputs.current-failure-list }}" ]; then
+        if [ -s "${{ inputs.current-failure-list }}" ]; then
           echo 'Failures:'
           cat "${{ inputs.current-failure-list }}"
           exit 1
