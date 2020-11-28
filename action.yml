@@ -65,12 +65,20 @@ runs:
           while IFS= read -r file; do
             echo "Running ${{ inputs.compile-command }} $file"
             ${{ inputs.compile-command }} "$file" \
-              && (echo "$file" >> "${{ inputs.success-list}}") \
+              && (echo "$file" >> "${{ inputs.success-list }}") \
               || (echo "$file" >> "${{ inputs.current-failure-list }}")
-            echo "Current success list:"
-            cat "${{ inputs.success-list}}"
-            echo "Current failure list:"
-            cat "${{ inputs.current-failure-list }}"
+            if [ ! -f "${{ inputs.success-list }}" ] || [ ! -f "${{ inputs.current-failure-list }}" ]; then
+              echo 'Something is wrong, a compilation has been executed but no success nor failure has been registered'
+              exit 2
+            fi
+            if [ -f "${{ inputs.success-list }}" ]; then
+              echo "Current success list:"
+              cat "${{ inputs.success-list }}"
+            fi
+            if [ -f "${{ inputs.current-failure-list }}" ]; then
+              echo "Current failure list:"
+              cat "${{ inputs.current-failure-list }}"
+            fi
           done <"${{ inputs.failure-list }}"
         done
         echo 'Done.'
