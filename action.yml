@@ -63,13 +63,16 @@ runs:
           cat "${{ inputs.failure-list }}"
           while IFS= read -r file; do
             echo "Running ${{ inputs.compile-command }} $file"
-            if ${{ inputs.compile-command }} "$file"; then
+            if ${{ inputs.compile-command }} "$file" | tee buildlatex.log; then
               echo "$file" >> "${{ inputs.success-list }}"
-              echo "Current success list:"
+              echo "Compilation successful. Current success list:"
               cat "${{ inputs.success-list }}"
+            elif grep 'file contents does not seem to settle' < buildlatex.log; then
+              echo 'WARNING: rubber entered in a loop. Assuming compilation was successful.'
+              echo "$file" >> "${{ inputs.success-list }}"
             else
               echo "$file" >> "${{ inputs.current-failure-list }}"
-              echo "Current failure list:"
+              echo "Compilation failed. Current failure list:"
               cat "${{ inputs.current-failure-list }}"
             fi
             if [ ! -f "${{ inputs.success-list }}" ] && [ ! -f "${{ inputs.current-failure-list }}" ]; then
