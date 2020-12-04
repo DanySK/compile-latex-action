@@ -63,7 +63,7 @@ runs:
           cat "${{ inputs.failure-list }}"
           while IFS= read -r file; do
             echo "Running ${{ inputs.compile-command }} $file"
-            if ${{ inputs.compile-command }} "$file" | tee buildlatex.log; then
+            if ${{ inputs.compile-command }} "$file" 2>&1 | tee buildlatex.log; then
               echo "$file" >> "${{ inputs.success-list }}"
               echo "Compilation successful. Current success list:"
               cat "${{ inputs.success-list }}"
