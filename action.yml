@@ -6,75 +6,20 @@ branding:
 inputs:
   compile-command:
     description: The command to invoke to compile. Defaults to 'rubber --inplace -d --synctex -s'
-    required: true
+    required: false
     default: rubber --unsafe --inplace -d --synctex -s
+  verbose:
+    description: Adds more output
+    required: false
+    default: true
+  success-list:
+    description: the file name where results will be saved
+    required: false
+    default: 'success-list'
 runs:
-  using: "composite"
-  steps: 
-    - shell: bash
-      run: sudo apt-get install -y rubber
-    # Note: grep will likely fail some matches, so there must be a || true around the command
-    - shell: bash
-      run: |
-        (find "${GITHUB_WORKSPACE:-/}" -type f -name '*.tex' -print0 | \
-            xargs -0 grep -PiL '\s*%\s*\!\s*TeX\s*root.*' | \
-            tee "${{ inputs.compile-list }}") || true
-    - shell: bash
-      run: |
-        echo The following files have been detected as LaTeX roots. If some are not, you can add a magic comment '%!TeX root = ...' to make this action skip them
-        cat "${{ inputs.compile-list }}"
-    # Strategy
-    # while the contents of current-failure-list and failure-list are different and failure-list is not empty
-    # replace failure-list with current-failure-list
-    # delete current-failure-list
-    # for each file in failure list run the compilation
-    # if it is successful, append to success_list
-    # if it fails, append to current-failure-list
-    # if failure-list is not empty, log successes, failures, and fail
-    - shell: bash
-      run: touch ${{ inputs.failure-list }}
-    - shell: bash
-      run: cp "${{ inputs.compile-list }}" "${{ inputs.current-failure-list }}"
-    - shell: bash
-      run: |
-        while \
-          [ -s "${{ inputs.current-failure-list }}" ] \
-          && ! diff <(sort "${{ inputs.failure-list }}" | uniq) <(sort "${{ inputs.current-failure-list }}" | uniq) ;\
-        do
-          echo 'There is still work to do. Trying to compile:'
-          cp "${{ inputs.current-failure-list }}" "${{ inputs.failure-list }}"
-          rm "${{ inputs.current-failure-list }}"
-          cat "${{ inputs.failure-list }}"
-          while IFS= read -r file; do
-            echo "Running ${{ inputs.compile-command }} $file"
-            if ${{ inputs.compile-command }} "$file" 2>&1 | tee buildlatex.log; then
-              echo "$file" >> "${{ inputs.success-list }}"
-              echo "Compilation successful. Current success list:"
-              cat "${{ inputs.success-list }}"
-            elif grep 'file contents does not seem to settle' < buildlatex.log; then
-              echo 'WARNING: rubber entered in a loop. Assuming compilation was successful.'
-              echo "$file" >> "${{ inputs.success-list }}"
-            else
-              echo "$file" >> "${{ inputs.current-failure-list }}"
-              echo "Compilation failed. Current failure list:"
-              cat "${{ inputs.current-failure-list }}"
-            fi
-            if [ ! -f "${{ inputs.success-list }}" ] && [ ! -f "${{ inputs.current-failure-list }}" ]; then
-              echo 'Something is wrong, a compilation has been executed but no success nor failure has been registered'
-              exit 2
-            fi
-          done <"${{ inputs.failure-list }}"
-        done
-        echo 'Done.'
-        if [ -f "${{ inputs.success-list}}" ]; then
-          echo 'Files correctly compiled:'
-          cat "${{ inputs.success-list }}"
-        else
-          echo 'No successful compilations'
-        fi
-        if [ -s "${{ inputs.current-failure-list }}" ]; then
-          echo 'Failures:'
-          cat "${{ inputs.current-failure-list }}"
-          exit 1
-        fi
-        exit 0
+  using: "docker"
+  image: 'danysk/compile-latex-action'
+  args:
+    - ${{ inputs.compile-command }}
+    - ${{ inputs.verbose }}
+    - ${{ inputs.success-list }}
