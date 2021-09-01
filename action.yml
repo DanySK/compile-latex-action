@@ -12,10 +12,9 @@ inputs:
     description: Adds more output
     required: false
     default: true
+outputs:
   success-list:
-    description: the file name where results will be saved
-    required: false
-    default: 'success-list'
+    description: the list of correctly compiled files
 runs:
   using: "docker"
   image: Dockerfile
