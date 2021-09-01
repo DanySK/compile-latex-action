@@ -13,7 +13,7 @@ end
 puts `ls test`
 
 command = ARGV[0] || 'rubber --unsafe --inplace -d --synctex -s'
-success_list = ARGV[1] || 'success-list'
+success_list = ARGV[2] || 'success-list'
 verbose = ARGV[1].to_s.downcase != "false"
 magic_comment_matcher = /^\s*%.*!\s*[Tt][Ee][xX]\s*root\s*=\s*(.*\.[Tt][Ee][xX]).*$/
 tex_files = targets = Dir["**/*.tex"]
@@ -39,19 +39,24 @@ until successes == tex_roots || successes == previous_successes do
     previous_successes = successes
     failures = Set[]
     (tex_roots - successes).each do |root|
-        Dir.chdir(root[/^(.*\/).*\.[Tt][Ee][xX]$/, 1])
-        install_command = "texliveonfly #{root}"
+        match = root.match(/^(.*)\/(.*\.[Tt][Ee][xX])$/)
+        directory = match[1]
+        target = match[2]
+        Dir.chdir(directory)
+        install_command = "texliveonfly #{target}"
         puts "Installing required packages via #{install_command}"
         output = `#{install_command}`
         puts(output) if verbose
-        puts "Compiling #{root} with '#{command} #{root}'"
-        output = `#{command} #{root}`
+        puts "Compiling #{target} with '#{command} #{target}'"
+        output = `#{command} #{target}`
         puts(output) if verbose
         $?.success? && successes << root || failures << [root, output]
     end
 end 
-File.open(success_list, "w+") do |f|
-    f.puts(successes)
+File.open(success_list, "w+") do |file|
+    successes.each do |success|
+        file.puts success
+    end
 end
 failures.each do |file, output|
     warn(file, "failed to compile, output:\n#{output}")
