@@ -27,7 +27,7 @@ jobs:
           IMAGE_NAME="$(echo $SLUG | tr '[:upper:]' '[:lower:]')"
           echo IMAGE_NAME="$IMAGE_NAME"
           echo IMAGE_NAME="$IMAGE_NAME" >> $GITHUB_ENV
-      - name: Compute version and Build Image
+      - name: Compute version
         run: |
           LAST_TAG=$(git describe --tags --abbrev=0)
           MAJOR_MINOR=${LAST_TAG%.*}
@@ -35,6 +35,8 @@ jobs:
           VERSION="$MAJOR_MINOR.$COMMIT_COUNT_FROM_TAG"
           echo Version has been computed as $VERSION
           echo VERSION="$VERSION" >> $GITHUB_ENV
+      - name: Build Image
+        run: |
           echo docker build -t "$IMAGE_NAME:$VERSION" .
           docker build -t "$IMAGE_NAME:$VERSION" .
       - name: Run tests
