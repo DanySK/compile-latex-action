@@ -12,9 +12,9 @@ end
 
 puts `ls test`
 
+export_name = 'success-list'
 command = ARGV[0] || 'rubber --unsafe --inplace -d --synctex -s'
 verbose = ARGV[1].to_s.downcase != "false"
-success_list = ARGV[2] || 'success-list'
 magic_comment_matcher = /^\s*%.*!\s*[Tt][Ee][xX]\s*root\s*=\s*(.*\.[Tt][Ee][xX]).*$/
 tex_files = targets = Dir["**/*.tex"]
     .map { |it| File.expand_path(it) }
@@ -58,7 +58,7 @@ Dir.chdir(initial_directory)
 success_list = successes.map{ |it| it.sub(initial_directory, '') }.join("\n") + "\n"
 puts 'Generated success list:'
 puts success_list
-`echo "::set-output name=time::#{success_list}"`
+`echo "::set-output name=#{export_name}::#{success_list}"`
 failures.each do |file, output|
     warn(file, "failed to compile, output:\n#{output}")
 end
