@@ -35,6 +35,7 @@ puts "Detected the following LaTeX roots: #{tex_roots}"
 successes = Set[]
 previous_successes = nil
 failures = Set[]
+initial_directory = __dir__
 until successes == tex_roots || successes == previous_successes do
     previous_successes = successes
     failures = Set[]
@@ -53,11 +54,15 @@ until successes == tex_roots || successes == previous_successes do
         $?.success? && successes << root || failures << [root, output]
     end
 end 
+Dir.chdir(initial_directory)
 File.open(success_list, "w+") do |file|
-    successes.each do |success|
+    successes.map{ |it| it.sub(initial_directory, '') }.each do |success|
         file.puts success
+        puts "Successfully compiled: #{success}"
     end
 end
+puts 'Generated success list:'
+puts `cat #{success_list}`
 failures.each do |file, output|
     warn(file, "failed to compile, output:\n#{output}")
 end
