@@ -18,7 +18,7 @@ inputs:
     default: 'success-list'
 runs:
   using: "docker"
-  image: 'danysk/compile-latex-action'
+  image: Dockerfile
   args:
     - ${{ inputs.compile-command }}
     - ${{ inputs.verbose }}
