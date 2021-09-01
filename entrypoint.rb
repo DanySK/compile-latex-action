@@ -13,8 +13,8 @@ end
 puts `ls test`
 
 command = ARGV[0] || 'rubber --unsafe --inplace -d --synctex -s'
-success_list = ARGV[2] || 'success-list'
 verbose = ARGV[1].to_s.downcase != "false"
+success_list = ARGV[2] || 'success-list'
 magic_comment_matcher = /^\s*%.*!\s*[Tt][Ee][xX]\s*root\s*=\s*(.*\.[Tt][Ee][xX]).*$/
 tex_files = targets = Dir["**/*.tex"]
     .map { |it| File.expand_path(it) }
