@@ -6,8 +6,10 @@ repos = [
     'https://github.com/DanySK/Template-PhD-Tesi-Giovanni-Ciatto.git',
 ]
 index = 0
+`rm -rf test`
+`mkdir test`
 for repo in repos do
     `git clone #{repo} test/test-#{index += 1}`
 end
-`docker run -v "$(pwd)/test":/test:rw test 'rubber --unsafe --inplace -d --synctex -s' 'false'`
+puts `docker run -v "$(pwd)/test":/test:rw test`
 exit $?.exitstatus
