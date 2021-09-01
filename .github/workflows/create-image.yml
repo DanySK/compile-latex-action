@@ -32,7 +32,7 @@ jobs:
           LAST_TAG=$(git describe --tags --abbrev=0)
           MAJOR_MINOR=${LAST_TAG%.*}
           COMMIT_COUNT_FROM_TAG="$(git log --oneline "$MAJOR_MINOR.0".. | wc -l)"
-          VERSION="$MAJOR_MINOR.COMMIT_COUNT_FROM_TAG"
+          VERSION="$MAJOR_MINOR.$COMMIT_COUNT_FROM_TAG"
           echo Version has been computed as $VERSION
           echo VERSION="$VERSION" >> $GITHUB_ENV
           echo docker build -t "$IMAGE_NAME:$VERSION" .
