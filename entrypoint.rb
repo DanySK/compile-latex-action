@@ -55,10 +55,10 @@ until successes == tex_roots || successes == previous_successes do
     end
 end 
 Dir.chdir(initial_directory)
-success_list = successes.map{ |it| it.sub(initial_directory, '') }.join('\n') + '\n'
+success_list = successes.map{ |it| it.sub(initial_directory, '') }.join("\n") + "\n"
 puts 'Generated success list:'
 puts success_list
-`echo "::set-output name=time::#{success_list}`
+`echo "::set-output name=time::#{success_list}"`
 failures.each do |file, output|
     warn(file, "failed to compile, output:\n#{output}")
 end
