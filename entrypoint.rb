@@ -12,9 +12,11 @@ end
 
 puts `ls test`
 
-export_name = 'success-list'
+export_name = 'success'
 command = ARGV[0] || 'rubber --unsafe --inplace -d --synctex -s'
 verbose = ARGV[1].to_s.downcase != "false"
+output_variable = ARGV[2] || 'LATEX_SUCCESSES'
+
 magic_comment_matcher = /^\s*%.*!\s*[Tt][Ee][xX]\s*root\s*=\s*(.*\.[Tt][Ee][xX]).*$/
 tex_files = targets = Dir["**/*.tex"]
     .map { |it| File.expand_path(it) }
@@ -56,9 +58,10 @@ until successes == tex_roots || successes == previous_successes do
 end 
 Dir.chdir(initial_directory)
 success_list = successes.map{ |it| it.sub(initial_directory, '') }.join("\n") + "\n"
-puts 'Generated success list:'
-puts success_list
-`echo "::set-output name=#{export_name}::#{success_list}"`
+`echo #{output_variable}="#{success_list}" >> $GITHUB_ENV`
+puts 'Generated variable output:'
+puts `echo #{output_variable}="#{success_list}"`
+
 failures.each do |file, output|
     warn(file, "failed to compile, output:\n#{output}")
 end

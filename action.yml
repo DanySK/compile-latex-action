@@ -4,7 +4,7 @@ branding:
   icon: book-open
   color: orange
 inputs:
-  compile-command:
+  command:
     description: The command to invoke to compile. Defaults to 'rubber --inplace -d --synctex -s'
     required: false
     default: rubber --unsafe --inplace -d --synctex -s
@@ -12,13 +12,14 @@ inputs:
     description: Adds more output
     required: false
     default: true
-outputs:
-  success-list:
-    description: the list of correctly compiled files
+  success:
+    description: The name of the environment variable that will hold the list of correctly compiled files. Since GitHub Actions does not support multiline output, this action writes on a variable. 
+    required: false
+    default: LATEX_SUCCESSES
 runs:
   using: "docker"
   image: Dockerfile
   args:
-    - ${{ inputs.compile-command }}
+    - ${{ inputs.command }}
     - ${{ inputs.verbose }}
-    - ${{ inputs.success-list }}
+    - ${{ inputs.success }}
