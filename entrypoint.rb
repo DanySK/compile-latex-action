@@ -10,17 +10,21 @@ def warn(file, message)
     end
 end
 
-puts `ls test`
-
-export_name = 'success'
 command = ARGV[0] || 'rubber --unsafe --inplace -d --synctex -s'
 verbose = ARGV[1].to_s.downcase != "false"
 output_variable = ARGV[2] || 'LATEX_SUCCESSES'
 
 magic_comment_matcher = /^\s*%.*!\s*[Tt][Ee][xX]\s*root\s*=\s*(.*\.[Tt][Ee][xX]).*$/
-tex_files = targets = Dir["**/*.tex"]
-    .map { |it| File.expand_path(it) }
-    .reject { |it| it =~ /^\/(usr|etc|bin)\/.*$/ }
+initial_directory = File.expand_path('.')
+puts "Working from #{initial_directory}"
+tex_files = Dir[
+    "#{initial_directory}/*.tex",
+    "#{initial_directory}/**/*.tex",
+    "#{initial_directory}/*.TEX",
+    "#{initial_directory}/**/*.TEX",
+    "#{initial_directory}/*.TeX",
+    "#{initial_directory}/**/*.TeX",
+]
 puts "Found these tex files: #{tex_files}" if verbose
 tex_roots = tex_files.filter_map do |file|
     File.read(file)
@@ -32,12 +36,12 @@ tex_ancillary.each do |file, match|
     File.file?(match) && tex_roots << match ||
         warn(file, "#{file} declares its root to be #{match}, but such file does not exist.")
 end
-tex_roots = tex_roots.map(&:first).to_set
+tex_roots = tex_roots.map(&:first)
 puts "Detected the following LaTeX roots: #{tex_roots}"
+tex_roots = tex_roots.to_set
 successes = Set[]
 previous_successes = nil
 failures = Set[]
-initial_directory = __dir__
 until successes == tex_roots || successes == previous_successes do
     previous_successes = successes
     failures = Set[]
@@ -47,20 +51,25 @@ until successes == tex_roots || successes == previous_successes do
         target = match[2]
         Dir.chdir(directory)
         install_command = "texliveonfly #{target}"
-        puts "Installing required packages via #{install_command}"
+        puts "Installing required packages via #{target}"
         output = `#{install_command}`
         puts(output) if verbose
         puts "Compiling #{target} with '#{command} #{target}'"
         output = `#{command} #{target}`
         puts(output) if verbose
+        Dir.chdir(initial_directory)
         $?.success? && successes << root || failures << [root, output]
     end
 end 
-Dir.chdir(initial_directory)
 success_list = successes.map{ |it| it.sub(initial_directory, '') }.join("\n") + "\n"
-`echo #{output_variable}="#{success_list}" >> $GITHUB_ENV`
+
+export_command = "echo '#{output_variable}=\"#{success_list}\"'"
 puts 'Generated variable output:'
-puts `echo #{output_variable}="#{success_list}"`
+puts export_command
+if ENV['GITHUB_ENV'] then
+    puts 'Detected actual GitHub Actions environment, running the export'
+    `#{export_command} >> $GITHUB_ENV`
+end
 
 failures.each do |file, output|
     warn(file, "failed to compile, output:\n#{output}")

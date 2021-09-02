@@ -11,5 +11,6 @@ RUN chmod +x /usr/bin/tlmgr
 RUN tlmgr init-usertree
 RUN tlmgr option repository https://mirror.ctan.org/systems/texlive/tlnet
 COPY entrypoint.rb entrypoint.rb
+RUN ruby -c entrypoint.rb
 RUN chmod +x entrypoint.rb
 ENTRYPOINT [ "/entrypoint.rb" ]
