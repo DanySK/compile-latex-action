@@ -15,15 +15,15 @@ verbose = ARGV[1].to_s.downcase != "false"
 output_variable = ARGV[2] || 'LATEX_SUCCESSES'
 
 magic_comment_matcher = /^\s*%.*!\s*[Tt][Ee][xX]\s*root\s*=\s*(.*\.[Tt][Ee][xX]).*$/
-initial_directory = File.expand_path('.')
+initial_directory = File.expand_path('.') + '/'
 puts "Working from #{initial_directory}"
 tex_files = Dir[
-    "#{initial_directory}/*.tex",
-    "#{initial_directory}/**/*.tex",
-    "#{initial_directory}/*.TEX",
-    "#{initial_directory}/**/*.TEX",
-    "#{initial_directory}/*.TeX",
-    "#{initial_directory}/**/*.TeX",
+    "#{initial_directory}*.tex",
+    "#{initial_directory}**/*.tex",
+    "#{initial_directory}*.TEX",
+    "#{initial_directory}**/*.TEX",
+    "#{initial_directory}*.TeX",
+    "#{initial_directory}**/*.TeX",
 ]
 puts "Found these tex files: #{tex_files}" if verbose
 tex_roots = tex_files.filter_map do |file|
@@ -48,6 +48,7 @@ until successes == tex_roots || successes == previous_successes do
     (tex_roots - successes).each do |root|
         match = root.match(/^(.*)\/(.*\.[Tt][Ee][xX])$/)
         directory = match[1]
+        puts "Moving to #{directory}"
         target = match[2]
         Dir.chdir(directory)
         install_command = "texliveonfly #{target}"
@@ -61,14 +62,20 @@ until successes == tex_roots || successes == previous_successes do
         $?.success? && successes << root || failures << [root, output]
     end
 end 
-success_list = successes.map{ |it| it.sub(initial_directory, '') }.join("\n") + "\n"
+success_list = successes.map{ |it| it.sub(initial_directory, '') }.join("\n")
 
-export_command = "echo '#{output_variable}=\"#{success_list}\"'"
+heredoc_delimiter = 'EOF'
+export = "#{output_variable}<<#{heredoc_delimiter}\n#{success_list}\n#{heredoc_delimiter}"
 puts 'Generated variable output:'
-puts export_command
-if ENV['GITHUB_ENV'] then
+puts export
+
+github_environment = ENV['GITHUB_ENV']
+if github_environment then
     puts 'Detected actual GitHub Actions environment, running the export'
-    `#{export_command} >> $GITHUB_ENV`
+    File.open(github_environment, 'a') do |env|
+        env.puts(export)
+    end
+    puts File.open(github_environment).read
 end
 
 failures.each do |file, output|
