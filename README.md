@@ -1,16 +1,21 @@
 # Compile LaTeX Action
 
-A GitHub Action that compiles all LaTeX documents in one shot, automatically, with minimal configuration, using (by default) the great [Rubber](https://gitlab.com/latex-rubber/rubber/) toolchain.
+A GitHub Action that compiles all LaTeX documents in one shot, automatically,
+with minimal configuration,
+using (by default) the great [Rubber](https://gitlab.com/latex-rubber/rubber/) toolchain.
 
-This action is meant to be as portable as possible, namely, it is meant to be written once and then delivered to multiple repositories with no changes (e.g., via [Autodelivery](https://github.com/marketplace/actions/autodelivery)).
+This action is meant to be as portable as possible, namely,
+it is meant to be written once and then delivered to multiple repositories with no changes (e.g., via [Autodelivery](https://github.com/marketplace/actions/autodelivery)).
 
 To this end, this action scans your file system, searching for `.tex` files.
-Unless a file has a magic comment similar to `% ! TeX root = ...`, then it is interpreted as a LaTeX root document and its compilation is attempted.
+Unless a file has a magic comment similar to `% ! TeX root = ...`,
+then it is interpreted as a LaTeX root document and its compilation is attempted.
+If the magic comment is found, then the value of the magic comment is also added to the list of files to be compiled.
 
-A list of compiled files is produced, so that it can easily be used to deploy them wherever you see fit.
+A list of compiled files is produced and stored in the `LATEX_SUCCESSES` multi-line environment variable,
+so that it can easily be used to deploy them wherever you see fit.
 
-The action installs Rubber autonomously, but expects you to have setup TeXLive correctly.
-We recommend using the [Setup TeXLive action](https://github.com/marketplace/actions/setup-texlive) to do so.
+Starting with version 0.3.0, the action relies on a Manjaro Linux-based installation of TeXLive + Minted + Rubber and uses `texliveonfly` to install the required packages on the fly, thus requiring no special environment configuration.
 
 ## Usage examples
 
@@ -26,7 +31,6 @@ jobs:
   Build-LaTeX:
     runs-on: ubuntu-latest
     steps:
-      # Checkout the repository
       - name: Checkout
         uses: actions/checkout@v2
         with:
@@ -34,9 +38,8 @@ jobs:
       - name: Fetch tags
         shell: bash
         run: git fetch --tags -f
-      - name: Install TeXLive
-        uses: DanySK/setup-texlive-action@master
       - name: Compile LaTeX
+        # PICK A FIXED VERSION! I do work on master sometimes!
         uses: DanySK/compile-latex-action@master
       - name: Autotag
         uses: DanySK/semver-autotag-action@master
@@ -46,8 +49,8 @@ jobs:
         run: |
           TAG=$(git describe --tags --exact-match HEAD)
           hub release create -m "$(git tag -l --format='%(contents)' "$TAG")" "$TAG" || true
-          while IFS= read -r file; do
+          for file in $LATEX_SUCCESSES; do
             pdf="${file%.*}.pdf"
             echo "Delivering file $pdf"
-            hub release edit -m '' -a "$pdf" "$TAG"
-          done <"success-list"
+            gh release upload "$TAG" "$pdf" --clobber
+          done
