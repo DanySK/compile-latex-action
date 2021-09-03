@@ -7,7 +7,7 @@ inputs:
   command:
     description: The command to invoke to compile. Defaults to 'rubber --inplace -d --synctex -s'
     required: false
-    default: rubber --unsafe --inplace -d --synctex -s
+    default: rubber --unsafe --inplace -d --synctex -s -W all
   verbose:
     description: Adds more output
     required: false

@@ -6,11 +6,11 @@ def warn(file, message)
     if (ENV['GITHUB_ACTIONS'] == 'true') then
         `::warning file=#{file},line=1,col=1::#{message}`
     else
-        `W: #{"Warning on file #{file}:\n#{message}".gsub(/\R/, "\nW: ")}`
+        puts "W: #{"Warning on file #{file}:\n#{message}".gsub(/\R/, "\nW: ")}"
     end
 end
 
-command = ARGV[0] || 'rubber --unsafe --inplace -d --synctex -s'
+command = ARGV[0] || 'rubber --unsafe --inplace -d --synctex -s -W all'
 verbose = ARGV[1].to_s.downcase != "false"
 output_variable = ARGV[2] || 'LATEX_SUCCESSES'
 
@@ -47,19 +47,19 @@ until successes == tex_roots || successes == previous_successes do
     failures = Set[]
     (tex_roots - successes).each do |root|
         match = root.match(/^(.*)\/(.*\.[Tt][Ee][xX])$/)
-        directory = match[1]
-        puts "Moving to #{directory}"
-        target = match[2]
-        Dir.chdir(directory)
-        install_command = "texliveonfly #{target}"
-        puts "Installing required packages via #{target}"
-        output = `#{install_command}`
+        install_command = "texliveonfly #{root}"
+        puts "Installing required packages via #{root}"
+        output = `#{install_command} 2>&1`
         puts(output) if verbose
-        puts "Compiling #{target} with '#{command} #{target}'"
-        output = `#{command} #{target}`
+        puts "Compiling #{root} with '#{command} #{root}'"
+        output << `#{command} #{root} 2>&1`
         puts(output) if verbose
         Dir.chdir(initial_directory)
-        $?.success? && successes << root || failures << [root, output]
+        if $?.success? then
+            successes << root
+        else
+            failures << [root, output]
+        end
     end
 end 
 success_list = successes.map{ |it| it.sub(initial_directory, '') }.join("\n")
