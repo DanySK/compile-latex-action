@@ -4,6 +4,7 @@ puts `docker build -t test .`
 
 repos = [
     'https://github.com/DanySK/Template-PhD-Tesi-Giovanni-Ciatto.git',
+    'https://github.com/DanySK/Template-Elsevier-Article.git',
 ]
 index = 0
 `rm -rf test`
