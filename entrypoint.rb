@@ -3,8 +3,7 @@
 require 'set'
 
 def warn(file, message)
-        puts "W: #{"Warning on file #{file}:\n#{message}".gsub(/\R/, "\nW: ")}"
-    end
+    puts "W: #{"Warning on file #{file}:\n#{message}".gsub(/\R/, "\nW: ")}"
 end
 
 command = ARGV[0] || 'rubber --unsafe --inplace -d --synctex -s -W all'
