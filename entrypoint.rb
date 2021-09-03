@@ -3,9 +3,6 @@
 require 'set'
 
 def warn(file, message)
-    if (ENV['GITHUB_ACTIONS'] == 'true') then
-        `::warning file=#{file},line=1,col=1::#{message}`
-    else
         puts "W: #{"Warning on file #{file}:\n#{message}".gsub(/\R/, "\nW: ")}"
     end
 end
