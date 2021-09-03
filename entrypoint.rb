@@ -11,7 +11,7 @@ def warn(file, message)
 end
 
 command = ARGV[0] || 'rubber --unsafe --inplace -d --synctex -s -W all'
-verbose = ARGV[1].to_s.downcase != "false"
+verbose = ARGV[1].to_s.downcase == "true"
 output_variable = ARGV[2] || 'LATEX_SUCCESSES'
 
 magic_comment_matcher = /^\s*%.*!\s*[Tt][Ee][xX]\s*root\s*=\s*(.*\.[Tt][Ee][xX]).*$/
@@ -70,7 +70,7 @@ puts 'Generated variable output:'
 puts export
 
 github_environment = ENV['GITHUB_ENV']
-if github_environment then
+if !success_list.empty? && github_environment then
     puts 'Detected actual GitHub Actions environment, running the export'
     File.open(github_environment, 'a') do |env|
         env.puts(export)

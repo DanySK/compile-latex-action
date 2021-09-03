@@ -11,7 +11,7 @@ inputs:
   verbose:
     description: Adds more output
     required: false
-    default: true
+    default: false
   success:
     description: The name of the environment variable that will hold the list of correctly compiled files. Since GitHub Actions does not support multiline output, this action writes on a variable. 
     required: false
