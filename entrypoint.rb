@@ -10,7 +10,6 @@ command = ARGV[0] || 'rubber --unsafe --inplace -d --synctex -s -W all'
 verbose = ARGV[1].to_s.downcase == "true"
 output_variable = ARGV[2] || 'LATEX_SUCCESSES'
 
-magic_comment_matcher = /^\s*%.*!\s*[Tt][Ee][xX]\s*root\s*=\s*(.*\.[Tt][Ee][xX]).*$/
 initial_directory = File.expand_path('.') + '/'
 puts "Working from #{initial_directory}"
 tex_files = Dir[
@@ -22,17 +21,25 @@ tex_files = Dir[
     "#{initial_directory}**/*.TeX",
 ]
 puts "Found these tex files: #{tex_files}" if verbose
+magic_comment_matcher = /^\s*%.*!\s*[Tt][Ee][xX]\s*root\s*=\s*(.*\.[Tt][Ee][xX]).*$/
 tex_roots = tex_files.filter_map do |file|
-    File.read(file)
-        .match(magic_comment_matcher, 1)
-        .then { |match| [file, match] }
+    text = File.read(file)
+    match = text[magic_comment_matcher, 1]
+    if match then
+        puts("File #{file} matched a magic comment pointing to #{match}")
+        directory = File.dirname(file)
+        match = "#{directory}/#{match}"
+        puts "The actual absolute file would be #{match}"
+    end
+    [file, match]
 end
 tex_ancillary, tex_roots = tex_roots.partition { | _, match | match }
+puts "These files have been detected as ancillary: #{tex_ancillary.map { |file, match| file }}"
+tex_roots = tex_roots.map(&:first)
 tex_ancillary.each do |file, match|
     File.file?(match) && tex_roots << match ||
         warn(file, "#{file} declares its root to be #{match}, but such file does not exist.")
 end
-tex_roots = tex_roots.map(&:first)
 puts "Detected the following LaTeX roots: #{tex_roots}"
 tex_roots = tex_roots.to_set
 successes = Set[]
@@ -44,7 +51,8 @@ until successes == tex_roots || successes == previous_successes do
     (tex_roots - successes).each do |root|
         match = root.match(/^(.*)\/(.*\.[Tt][Ee][xX])$/)
         install_command = "texliveonfly #{root}"
-        puts "Installing required packages via #{root}"
+        Dir.chdir(File.dirname(root))
+        puts "Installing required packages via #{install_command}"
         output = `#{install_command} 2>&1`
         puts(output) if verbose
         puts "Compiling #{root} with '#{command} #{root}'"
