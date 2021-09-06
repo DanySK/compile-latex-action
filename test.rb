@@ -7,7 +7,7 @@ repos = [
     'https://github.com/DanySK/Template-Elsevier-Article.git',
 ]
 index = 0
-`rm -rf test`
+`sudo rm -rf test`
 `mkdir test`
 for repo in repos do
     `git clone #{repo} test/test-#{index += 1}`
