@@ -50,13 +50,13 @@ until successes == tex_roots || successes == previous_successes do
     failures = Set[]
     (tex_roots - successes).each do |root|
         match = root.match(/^(.*)\/(.*\.[Tt][Ee][xX])$/)
-        install_command = "texliveonfly #{root}"
+        install_command = "texliveonfly '#{root}'"
         Dir.chdir(File.dirname(root))
         puts "Installing required packages via #{install_command}"
         output = `#{install_command} 2>&1`
         puts(output) if verbose
-        puts "Compiling #{root} with '#{command} #{root}'"
-        output << `#{command} #{root} 2>&1`
+        puts "Compiling #{root} with: \"#{command} '#{root}'\""
+        output << `#{command} '#{root}' 2>&1`
         puts(output) if verbose
         Dir.chdir(initial_directory)
         if $?.success? then
