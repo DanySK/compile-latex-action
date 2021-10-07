@@ -13,5 +13,5 @@ index = 0
 for repo in repos do
     `git clone #{repo} test/test-#{index += 1}`
 end
-puts `docker run --workdir="/github/workspace" -v "$(pwd)/test":/github/workspace:rw test`
+puts `docker run --rm --workdir="/github/workspace" -v "$(pwd)/test":/github/workspace:rw test`
 exit $?.exitstatus
