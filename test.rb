@@ -3,6 +3,7 @@ require 'json'
 puts `docker build -t test .`
 
 repos = [
+    'https://github.com/DanySK/Course-Simulation-Basics.git',
     'https://github.com/DanySK/Curriculum-Vitae.git',
     'https://github.com/DanySK/Template-PhD-Tesi-Giovanni-Ciatto.git',
     'https://github.com/DanySK/Template-Elsevier-Article.git',
