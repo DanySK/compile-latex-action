@@ -6,8 +6,12 @@ on:
       - 'autodelivery**'
       - 'bump-**'
       - 'renovate/**'
+    paths-ignore:
+      - 'README.md'
+      - 'CHANGELOG.md'
+      - 'LICENSE'
   pull_request:
-    
+
 jobs:
   Build-And-Deploy-Container:
     runs-on: ubuntu-latest
