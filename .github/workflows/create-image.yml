@@ -13,13 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-          submodules: recursive
-      - name: Fetch tags
-        shell: bash
-        run: git fetch --tags -f
+        uses: danysk/action-checkout@0.1.0
       - name: Compute name
         env:
           SLUG: ${{ github.repository }}
