@@ -7,7 +7,7 @@ my_latex = [
     'Curriculum-Vitae',
     'Template-ACM-Article',
     'Template-Elsevier-Article',
-    #'Template-Elsevier-CAS-DC',
+    'Template-Elsevier-CAS-DC',
     'Template-IEEE-Computer-Society-Magazines',
     'Template-IEEE-Conference-Proceedings',
     'Template-LaTeX-achemso',
