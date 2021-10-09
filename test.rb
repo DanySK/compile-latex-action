@@ -15,7 +15,7 @@ my_latex = [
     'Template-LaTeX-ERC',
     'Template-LaTeX-LMCS',
     'Template-LaTeX-LNCS',
-    #'Template-LaTeX-MDPI',
+    'Template-LaTeX-MDPI',
     'Template-PhD-Tesi-Giovanni-Ciatto',
 ]
 
