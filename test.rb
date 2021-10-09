@@ -12,7 +12,7 @@ my_latex = [
     'Template-IEEE-Conference-Proceedings',
     'Template-LaTeX-achemso',
     'Template-LaTeX-CI',
-    #'Template-LaTeX-ERC',
+    'Template-LaTeX-ERC',
     'Template-LaTeX-LMCS',
     'Template-LaTeX-LNCS',
     #'Template-LaTeX-MDPI',
