@@ -2,12 +2,24 @@
 require 'json'
 puts `docker build -t test .`
 
-repos = [
-    'https://github.com/DanySK/Course-Simulation-Basics.git',
-    'https://github.com/DanySK/Curriculum-Vitae.git',
-    'https://github.com/DanySK/Template-PhD-Tesi-Giovanni-Ciatto.git',
-    'https://github.com/DanySK/Template-Elsevier-Article.git',
+my_latex = [
+    'Course-Simulation-Basics',
+    'Curriculum-Vitae',
+    'Template-ACM-Article',
+    'Template-Elsevier-Article',
+    'Template-Elsevier-CAS-DC',
+    'Template-IEEE-Computer-Society-Magazines'
+    'Template-IEEE-Conference-Proceedings'
+    'Template-LaTeX-achemso'
+    'Template-LaTeX-CI'
+    'Template-LaTeX-ERC'
+    'Template-LaTeX-LMCS'
+    'Template-LaTeX-LNCS'
+    'Template-LaTeX-MDPI'
+    'Template-PhD-Tesi-Giovanni-Ciatto',
 ]
+
+repos = my_latex.map { |it| "https://github.com/DanySK/#{it}.git" }
 index = 0
 `sudo rm -rf test`
 `mkdir test`
