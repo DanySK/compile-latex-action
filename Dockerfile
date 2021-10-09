@@ -1,4 +1,4 @@
-FROM danysk/docker-manjaro-texlive-base:21.20211009.1144
+FROM danysk/docker-manjaro-texlive-base:22.20211009.1501
 COPY entrypoint.rb entrypoint.rb
 RUN ruby -c entrypoint.rb
 RUN chmod +x entrypoint.rb
