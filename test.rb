@@ -5,7 +5,7 @@ puts `docker build -t test .`
 my_latex = [
     'Course-Simulation-Basics',
     'Curriculum-Vitae',
-    #'Template-ACM-Article',
+    'Template-ACM-Article',
     'Template-Elsevier-Article',
     #'Template-Elsevier-CAS-DC',
     'Template-IEEE-Computer-Society-Magazines',
