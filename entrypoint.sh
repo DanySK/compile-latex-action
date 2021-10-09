@@ -16,4 +16,4 @@ echo "Adding ROOT_GEM_HOME/bin to PATH"
 export PATH="$PATH:$ROOT_GEM_HOME/bin"
 echo "New PATH: $PATH"
 echo "Launching the tex scanning and compilation proces..."
-/entrypoint.rb
+/entrypoint.rb "$@"
