@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout
         uses: danysk/action-checkout@0.1.0
+      - name: Check the test syntax
+        run: ruby -c test.rb
       - name: Compute name
         env:
           SLUG: ${{ github.repository }}
