@@ -21,7 +21,7 @@ tex_files = Dir[
     "#{initial_directory}**/*.TeX",
 ]
 puts "Found these tex files: #{tex_files}" if verbose
-magic_comment_matcher = /^\s*%.*!\s*[Tt][Ee][xX]\s*root\s*=\s*(.*\.[Tt][Ee][xX]).*$/
+magic_comment_matcher = /^\s*%\s*!\s*[Tt][Ee][xX]\s*root\s*=\s*(.*\.[Tt][Ee][xX]).*$/
 tex_roots = tex_files.filter_map do |file|
     text = File.read(file)
     match = text[magic_comment_matcher, 1]
