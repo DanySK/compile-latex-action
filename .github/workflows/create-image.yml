@@ -12,6 +12,7 @@ on:
       - 'LICENSE'
       - 'renovate.json'
   pull_request:
+  workflow_dispatch:
 
 jobs:
   Build-And-Deploy-Container:
