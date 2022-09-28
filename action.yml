@@ -16,9 +16,14 @@ inputs:
     description: The name of the environment variable that will hold the list of correctly compiled files. Since GitHub Actions does not support multiline output, this action writes on a variable. 
     required: false
     default: LATEX_SUCCESSES
+  outputs:
+    successes:
+      description: "A comma-separated list of all successfully compiled files"
+      value: ${{ steps.compile.outputs.successes }}
 runs:
   using: "docker"
   image: Dockerfile
+  id: compile
   args:
     - ${{ inputs.command }}
     - ${{ inputs.verbose }}
