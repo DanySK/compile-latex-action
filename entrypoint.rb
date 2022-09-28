@@ -68,7 +68,7 @@ until successes == tex_roots || successes == previous_successes do
 end 
 success_list = successes.map{ |it| it.sub(initial_directory, '') }
 
-puts "::set-output name=successes::#{success_list.joing(',')}"
+puts "::set-output name=successes::#{success_list.join(',')}"
 
 heredoc_delimiter = 'EOF'
 export = "#{output_variable}<<#{heredoc_delimiter}\n#{success_list.join("\n")}\n#{heredoc_delimiter}"
