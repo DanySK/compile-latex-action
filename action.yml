@@ -17,8 +17,10 @@ inputs:
     required: false
     default: LATEX_SUCCESSES
   outputs:
-    successes:
+    successfully-compiled:
       description: "A comma-separated list of all successfully compiled files"
+    compiled-files:
+      description: "A comma-separated list of all the produced pdfs"
 
 runs:
   using: "docker"
