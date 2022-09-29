@@ -19,11 +19,10 @@ inputs:
   outputs:
     successes:
       description: "A comma-separated list of all successfully compiled files"
-      value: ${{ steps.compile.outputs.successes }}
+
 runs:
   using: "docker"
   image: Dockerfile
-  id: compile
   args:
     - ${{ inputs.command }}
     - ${{ inputs.verbose }}
