@@ -3,6 +3,7 @@
 require 'set'
 
 def warn(file, message)
+    puts "::error file={#{file}},title={Compilation failed for #{file}}::{#{message}}"
     puts "W: #{"Warning on file #{file}:\n#{message}".gsub(/\R/, "\nW: ")}"
 end
 
