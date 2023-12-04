@@ -21,8 +21,13 @@ my_latex = [
 
 `sudo rm -rf test`
 `mkdir test`
-for repo in my_latex do
-    `git clone --recurse-submodules https://github.com/DanySK/#{repo}.git test/test-#{repo}`
+treads = my_latex.map { | repo |
+    Thread.new { 
+        `git clone --recurse-submodules https://github.com/DanySK/#{repo}.git test/test-#{repo}`
+    }
+}
+for thread in threads do
+    thread.join
 end
 puts `docker run --rm --workdir="/github/workspace" -v "$(pwd)/test":/github/workspace:rw test`
 exit $?.exitstatus
