@@ -23,7 +23,7 @@ my_latex = [
 `mkdir test`
 for repo in my_latex do
     url = "https://github.com/DanySK/#{repo}.git"
-    `git clone --recurse-submodules #{repo} test/test-#{repo}`
+    `git clone --recurse-submodules #{url} test/test-#{repo}`
 end
 puts `docker run --rm --workdir="/github/workspace" -v "$(pwd)/test":/github/workspace:rw test`
 exit $?.exitstatus
