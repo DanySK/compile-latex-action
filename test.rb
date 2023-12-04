@@ -21,7 +21,7 @@ my_latex = [
 
 `sudo rm -rf test`
 `mkdir test`
-treads = my_latex.map { | repo |
+threads = my_latex.map { | repo |
     Thread.new { 
         `git clone --recurse-submodules https://github.com/DanySK/#{repo}.git test/test-#{repo}`
     }
