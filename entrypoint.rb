@@ -24,7 +24,7 @@ tex_files = Dir[
 puts "Found these tex files: #{tex_files}" if verbose
 magic_comment_matcher = /^\s*%\s*!\s*[Tt][Ee][xX]\s*root\s*=\s*(.*\.[Tt][Ee][xX]).*$/
 tex_roots = tex_files.filter_map do |file|
-    text = File.read(file)
+    text = File.read(file, :encoding => 'UTF-8')
     match = text[magic_comment_matcher, 1]
     if match then
         puts("File #{file} matched a magic comment pointing to #{match}")
