@@ -19,12 +19,11 @@ my_latex = [
     'Template-PhD-Tesi-Giovanni-Ciatto',
 ]
 
-repos = my_latex.map { |it| "https://github.com/DanySK/#{it}.git" }
-index = 0
 `sudo rm -rf test`
 `mkdir test`
-for repo in repos do
-    `git clone --recurse-submodules #{repo} test/test-#{index += 1}`
+for repo in my_latex do
+    url = "https://github.com/DanySK/#{repo}.git"
+    `git clone --recurse-submodules #{repo} test/test-#{repo}`
 end
 puts `docker run --rm --workdir="/github/workspace" -v "$(pwd)/test":/github/workspace:rw test`
 exit $?.exitstatus
