@@ -2,5 +2,12 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "local>DanySK/renovate-config"
+  ],
+  "packageRules": [
+    {
+      "description": "Trigger a minor update on some dependencies",
+      "matchManagers": ["dockerfile"],
+      "semanticCommitScope": "core-deps"
+    }
   ]
 }
