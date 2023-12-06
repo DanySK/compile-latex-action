@@ -29,33 +29,37 @@ jobs:
           IMAGE_NAME="$(echo $SLUG | tr '[:upper:]' '[:lower:]')"
           echo IMAGE_NAME="$IMAGE_NAME"
           echo IMAGE_NAME="$IMAGE_NAME" >> $GITHUB_ENV
-      - name: Compute version
-        run: |
-          LAST_TAG=$(git describe --tags --abbrev=0)
-          MAJOR_MINOR=${LAST_TAG%.*}
-          COMMIT_COUNT_FROM_TAG="$(git log --oneline "$MAJOR_MINOR.0".. | wc -l)"
-          VERSION="$MAJOR_MINOR.$COMMIT_COUNT_FROM_TAG"
-          echo Version has been computed as $VERSION
-          echo VERSION="$VERSION" >> $GITHUB_ENV
       - name: Build Image
         run: |
-          echo docker build -t "$IMAGE_NAME:$VERSION" .
-          docker build -t "$IMAGE_NAME:$VERSION" .
+          echo docker build -t "$IMAGE_NAME:latest" .
+          docker build -t "$IMAGE_NAME:latest" .
       - name: Run tests
         run: ./test.rb
+      - name: Find the version of Node from package.json
+        id: node-version
+        run: echo "version=$(jq -r .engines.node package.json)" >> $GITHUB_OUTPUT
+      - name: Install Node
+        uses: actions/setup-node@v4.0.0
+        with:
+          node-version: ${{ steps.node-version.outputs.version }}
+      - name: Configure Node
+        run: npm install
+      - name: Check whether we should actually run the deployment
+        id: should-deploy
+        run: >-
+          echo "should-deploy=${{
+            !github.event.repository.fork
+            && (
+              github.event_name != 'pull_request'
+              || github.event.pull_request.head.repo.full_name == github.repository
+            )
+          }}$" >> $GITHUB_OUTPUT
       - name: Login to Docker Hub
-        if: ${{ github.event_name != 'pull_request' }}
+        if: ${{ steps.should-deploy.outputs.should-deploy }}
         env:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           DOCKER_USERNAME: danysk
         run: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin docker.io
-      - name: Deploy Image
-        if: ${{ github.event_name != 'pull_request' }}
-        run: docker push --all-tags $IMAGE_NAME
-      - uses: ncipollo/release-action@v1
-        if: ${{ github.event_name != 'pull_request' }}
-        name: Create GitHub Release
-        with:
-          tag: ${{ env.VERSION }}
-          replacesArtifacts: true
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run semantic release
+        if: ${{ steps.should-deploy.outputs.should-deploy }}
+        run: npx semantic-release
