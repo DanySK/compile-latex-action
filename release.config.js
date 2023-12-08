@@ -8,7 +8,8 @@
  */
 
 var publishCmd = `
-docker push --all-tags \${process.env.IMAGE_NAME}:\${nextRelease.version}
+docker tag \${process.env.IMAGE_NAME}:latest \${process.env.IMAGE_NAME}:\${nextRelease.version}
+docker push --all-tags
 `
 var config = require('semantic-release-preconfigured-conventional-commits');
 config.plugins.push(
