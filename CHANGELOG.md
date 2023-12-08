@@ -1,3 +1,10 @@
+## [0.4.1](https://github.com/DanySK/compile-latex-action/compare/0.4.0...0.4.1) (2023-12-08)
+
+
+### Bug Fixes
+
+* **release:** tag before pushing all tags ([1aa1b94](https://github.com/DanySK/compile-latex-action/commit/1aa1b94dd7a1e12c6beee18ca70403bdfb6cd3a8))
+
 ## [0.4.0](https://github.com/DanySK/compile-latex-action/compare/0.3.124...0.4.0) (2023-12-08)
 
 
