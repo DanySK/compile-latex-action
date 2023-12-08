@@ -1,3 +1,10 @@
+## [0.4.2](https://github.com/DanySK/compile-latex-action/compare/0.4.1...0.4.2) (2023-12-08)
+
+
+### Bug Fixes
+
+* **release:** add image name to docker push command ([31cdc24](https://github.com/DanySK/compile-latex-action/commit/31cdc24ef23e74788d7cdd3342795b34c82dcbd1))
+
 ## [0.4.1](https://github.com/DanySK/compile-latex-action/compare/0.4.0...0.4.1) (2023-12-08)
 
 
