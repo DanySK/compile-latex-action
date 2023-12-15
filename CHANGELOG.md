@@ -1,3 +1,10 @@
+## [0.4.4](https://github.com/DanySK/compile-latex-action/compare/0.4.3...0.4.4) (2023-12-15)
+
+
+### Dependency updates
+
+* **core-deps:** update danysk/docker-manjaro-texlive-ruby docker tag to v15.0.123 ([a6d9d8b](https://github.com/DanySK/compile-latex-action/commit/a6d9d8b9ddaba3ae5ce557824b21eda6119fc207))
+
 ## [0.4.3](https://github.com/DanySK/compile-latex-action/compare/0.4.2...0.4.3) (2023-12-15)
 
 
