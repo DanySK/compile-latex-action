@@ -13,10 +13,36 @@ docker push --all-tags \${process.env.IMAGE_NAME}
 `
 var config = require('semantic-release-preconfigured-conventional-commits');
 config.plugins.push(
+    [
+        "semantic-release-replace-plugin",
+        {
+            "replacements": [
+                {
+                    "files": ["action.yml"],
+                    "from": "image: .*",
+                    "to": "image: danysk/compile-latex-action:${nextRelease.version}",
+                    "results": [
+                        {
+                            "file": "action.yml",
+                            "hasChanged": true,
+                            "numMatches": 1,
+                            "numReplacements": 1,
+                        }
+                    ],
+                    "countMatches": true
+                }
+            ]
+        }
+    ],
     ["@semantic-release/exec", {
         "publishCmd": publishCmd,
     }],
     "@semantic-release/github",
-    "@semantic-release/git",
+    [
+        "@semantic-release/git",
+        {
+            "assets": ["action.yml"],
+        }
+    ]
 )
 module.exports = config
