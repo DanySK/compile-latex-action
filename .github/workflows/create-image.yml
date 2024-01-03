@@ -21,6 +21,10 @@ jobs:
       contents: write
       packages: write
     steps:
+      - name: Cache Docker images
+        uses: ScribeMD/docker-cache@0.3.7
+        with:
+          key: docker-${{ runner.os }}-${{ hashFiles('.github/workflows/*', 'Dockerfile') }}
       - name: Checkout
         uses: danysk/action-checkout@0.2.14
       - name: Check the test syntax
