@@ -19,8 +19,8 @@ config.plugins.push(
             "replacements": [
                 {
                     "files": ["action.yml"],
-                    "from": "image: .*",
-                    "to": "image: danysk/compile-latex-action:${nextRelease.version}",
+                    "from": "image: docker://.*",
+                    "to": "image: docker://danysk/compile-latex-action:${nextRelease.version}",
                     "results": [
                         {
                             "file": "action.yml",
