@@ -4,7 +4,7 @@
     "semantic-release-replace-plugin": "1.2.7"
   },
   "engines": {
-    "node": "20.10",
+    "node": "20.11",
     "npm": ">=3.0.0"
   }
 }
