@@ -38,13 +38,10 @@ jobs:
           docker build -t "$IMAGE_NAME:latest" .
       - name: Run tests
         run: ./test.rb
-      - name: Find the version of Node from package.json
-        id: node-version
-        run: echo "version=$(jq -r .engines.node package.json)" >> $GITHUB_OUTPUT
       - name: Install Node
         uses: actions/setup-node@v4.0.4
         with:
-          node-version: ${{ steps.node-version.outputs.version }}
+          node-version-file: package.json
       - name: Configure Node
         run: npm install
       - name: Check whether we should actually run the deployment
