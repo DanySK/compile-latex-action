@@ -24,7 +24,7 @@ inputs:
 
 runs:
   using: "docker"
-  image: docker://danysk/compile-latex-action:1.0.28
+  image: docker://danysk/compile-latex-action:1.0.29
   args:
     - ${{ inputs.command }}
     - ${{ inputs.verbose }}
