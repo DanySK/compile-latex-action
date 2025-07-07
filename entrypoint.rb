@@ -7,88 +7,106 @@ def warn(file, message)
     puts "W: #{"Warning on file #{file}:\n#{message}".gsub(/\R/, "\nW: ")}"
 end
 
-command = ARGV[0] || 'rubber --unsafe --inplace -d --synctex -s -W all'
-verbose = ARGV[1].to_s.downcase == "true"
-output_variable = ARGV[2] || 'LATEX_SUCCESSES'
+command           = ARGV[0] || 'rubber --unsafe --inplace -d --synctex -s -W all'
+verbose           = ARGV[1].to_s.downcase == 'true'
+output_variable   = ARGV[2] || 'LATEX_SUCCESSES'
 
 initial_directory = File.expand_path('.') + '/'
 puts "Working from #{initial_directory}"
+
+# Gather all .tex files
 tex_files = Dir[
-    "#{initial_directory}*.tex",
-    "#{initial_directory}**/*.tex",
-    "#{initial_directory}*.TEX",
-    "#{initial_directory}**/*.TEX",
-    "#{initial_directory}*.TeX",
-    "#{initial_directory}**/*.TeX",
+  "#{initial_directory}*.tex",
+  "#{initial_directory}**/*.tex",
+  "#{initial_directory}*.TEX",
+  "#{initial_directory}**/*.TEX",
+  "#{initial_directory}*.TeX",
+  "#{initial_directory}**/*.TeX",
 ]
 puts "Found these tex files: #{tex_files}" if verbose
-magic_comment_matcher = /^\s*%\s*!\s*[Tt][Ee][xX]\s*root\s*=\s*(.*\.[Tt][Ee][xX]).*$/
-tex_roots = tex_files.filter_map do |file|
-    text = File.read(file, :encoding => 'UTF-8')
-    match = text[magic_comment_matcher, 1]
-    if match then
-        puts("File #{file} matched a magic comment pointing to #{match}")
-        directory = File.dirname(file)
-        match = "#{directory}/#{match}"
-        puts "The actual absolute file would be #{match}"
-    end
-    [file, match]
+
+# Exclude any .tex file that does not contain a \documentclass declaration
+filtered = []
+tex_files.each do |file|
+  content = File.read(file, encoding: 'UTF-8')
+  if content =~ /\\documentclass/ then
+    filtered << file
+  else
+    warn(file, "Excluded from compilation because it lacks a \\documentclass declaration.")
+  end
 end
-tex_ancillary, tex_roots = tex_roots.partition { | _, match | match }
-puts "These files have been detected as ancillary: #{tex_ancillary.map { |file, match| file }}"
+tex_files = filtered.to_set
+puts "Including #{tex_files.to_a} for compilation" if verbose
+
+# Detect magic-root comments
+magic_comment_matcher = /^\s*%\s*!\s*[Tt][Ee][xX]\s*root\s*=\s*(.*\.[Tt][Ee][xX]).*$/
+roots_and_ancillary = tex_files.map do |file|
+  content = File.read(file, encoding: 'UTF-8')
+  match   = content[magic_comment_matcher, 1]
+  [file, match]
+end
+
+# Separate ancillary (with magic roots) vs true roots
+tex_ancillary, tex_roots = roots_and_ancillary.partition { |_, match| match }
+puts "These files have been detected as ancillary: #{tex_ancillary.map(&:first)}"
+
+# Resolve ancillary to actual roots
 tex_roots = tex_roots.map(&:first)
 tex_ancillary.each do |file, match|
-    File.file?(match) && tex_roots << match ||
-        warn(file, "#{file} declares its root to be #{match}, but such file does not exist.")
+  full_path = File.join(File.dirname(file), match || '')
+  if File.file?(full_path)
+    tex_roots << full_path
+  else
+    warn(file, "#{file} declares its root as #{match}, but that file does not exist.")
+  end
 end
+
 tex_roots = tex_roots.to_set
-puts "Detected the following LaTeX roots: #{tex_roots}"
+puts "Detected the following LaTeX roots: #{tex_roots}" if verbose
+
+# Compile loop
 successes = Set[]
 previous_successes = nil
 failures = Set[]
 until successes == tex_roots || successes == previous_successes do
-    previous_successes = successes
-    failures = Set[]
-    (tex_roots - successes).each do |root|
-        match = root.match(/^(.*)\/(.*\.[Tt][Ee][xX])$/)
-        #install_command = "texliveonfly -a '-synctex=1 -interaction=nonstopmode -shell-escape' '#{root}'"
-        Dir.chdir(File.dirname(root))
-        #puts "Installing required packages via #{install_command}"
-        output = "" #`#{install_command} 2>&1`
-        #puts(output) if verbose
-        puts "Compiling #{root} with: \"#{command} '#{root}'\""
-        output << `#{command} '#{root}' 2>&1`
-        puts(output) if verbose
-        Dir.chdir(initial_directory)
-        if $?.success? then
-            successes << root
-        else
-            failures << [root, output]
-        end
-    end
-end 
-success_list = successes.map{ |it| it.sub(initial_directory, '') }
+  previous_successes = successes.dup
+  failures = Set[]
+  (tex_roots - successes).each do |root|
+    Dir.chdir(File.dirname(root))
+    puts "Compiling #{root} with: \"#{command} '#{root}'\""
+    output = `#{command} '#{root}' 2>&1`
+    puts output if verbose
+    Dir.chdir(initial_directory)
 
+    if $?.success?
+      successes << root
+    else
+      failures << [root, output]
+    end
+  end
+end
+
+# Prepare outputs
+success_list = successes.map { |f| f.sub(initial_directory, '') }
 puts "::set-output name=successfully-compiled::#{success_list.join(',')}"
-puts "::set-output name=compiled-files::#{
-    success_list.map { |file_name| file_name.gsub(/^(.*)\.\w+$/) { "#{$1}.pdf" } }.join(',')
-}"
+puts "::set-output name=compiled-files::#{success_list.map { |file|
+  file.sub(/\.[Tt][Ee][Xx]?$/, '.pdf')
+}.join(',')}"
 
 heredoc_delimiter = 'EOF'
 export = "#{output_variable}<<#{heredoc_delimiter}\n#{success_list.join("\n")}\n#{heredoc_delimiter}"
 puts 'Generated variable output:'
 puts export
 
-github_environment = ENV['GITHUB_ENV']
-if !success_list.empty? && github_environment then
-    puts 'Detected actual GitHub Actions environment, running the export'
-    File.open(github_environment, 'a') do |env|
-        env.puts(export)
-    end
-    puts File.open(github_environment).read
+github_env = ENV['GITHUB_ENV']
+if !success_list.empty? && github_env
+  puts 'Detected GitHub Actions environment; exporting list.'
+  File.open(github_env, 'a') { |env| env.puts(export) }
 end
 
+# Report failures as warnings
 failures.each do |file, output|
-    warn(file, "failed to compile, output:\n#{output}")
+  warn(file, "failed to compile, output:\n#{output}")
 end
+
 exit failures.size
