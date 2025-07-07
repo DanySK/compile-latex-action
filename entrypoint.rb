@@ -40,9 +40,9 @@ puts "Including #{tex_files.to_a} for compilation" if verbose
 
 # Detect magic-root comments
 magic_comment_matcher = /^\s*%\s*!\s*[Tt][Ee][xX]\s*root\s*=\s*(.*\.[Tt][Ee][xX]).*$/
-roots_and_ancillary = tex_files.map do |file|
+endroots_and_ancillary = tex_files.map do |file|
   content = File.read(file, encoding: 'UTF-8')
-  match   = content[magic_comment_matcher, 1]
+  match = content[magic_comment_matcher, 1]
   [file, match]
 end
 
