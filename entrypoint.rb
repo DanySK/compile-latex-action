@@ -7,9 +7,9 @@ def warn(file, message)
     puts "W: #{"Warning on file #{file}:\n#{message}".gsub(/\R/, "\nW: ")}"
 end
 
-command           = ARGV[0] || 'rubber --unsafe --inplace -d --synctex -s -W all'
-verbose           = ARGV[1].to_s.downcase == 'true'
-output_variable   = ARGV[2] || 'LATEX_SUCCESSES'
+command = ARGV[0] || 'rubber --unsafe --inplace -d --synctex -s -W all'
+verbose = ARGV[1].to_s.downcase == 'true'
+output_variable = ARGV[2] || 'LATEX_SUCCESSES'
 
 initial_directory = File.expand_path('.') + '/'
 puts "Working from #{initial_directory}"
