@@ -2,9 +2,21 @@
 
 require 'set'
 
+def annotate(level, marker, file, message)
+  title = marker == 'E' ? "Compilation failed for #{file}" : "Warning for #{file}"
+  puts "::#{level} file=#{file},title=#{title}::#{message}"
+  descriptor = marker == 'E' ? "Error in file #{file}:\n#{message}" : "Warning on file #{file}:\n#{message}"
+  puts "#{marker}: #{descriptor.gsub(/\R/, "\n#{marker}: ")}"
+end
+
+# Emit a GitHub error annotation and a prefixed message
+def error(file, message)
+  annotate('error', 'E', file, message)
+end
+
+# Emit a GitHub warning annotation and a prefixed message
 def warn(file, message)
-    puts "::error file={#{file}},title={Compilation failed for #{file}}::{#{message}}"
-    puts "W: #{"Warning on file #{file}:\n#{message}".gsub(/\R/, "\nW: ")}"
+  annotate('warning', 'W', file, message)
 end
 
 command = ARGV[0] || 'rubber --unsafe --inplace -d --synctex -s -W all'
@@ -21,7 +33,7 @@ tex_files = Dir[
   "#{initial_directory}*.TEX",
   "#{initial_directory}**/*.TEX",
   "#{initial_directory}*.TeX",
-  "#{initial_directory}**/*.TeX",
+  "#{initial_directory}**/*.TeX"
 ]
 puts "Found these tex files: #{tex_files}" if verbose
 
@@ -29,7 +41,7 @@ puts "Found these tex files: #{tex_files}" if verbose
 filtered = []
 tex_files.each do |file|
   content = File.read(file, encoding: 'UTF-8')
-  if content =~ /\\documentclass/ then
+  if content =~ /\\documentclass/
     filtered << file
   else
     warn(file, "Excluded from compilation because it lacks a \\documentclass declaration.")
@@ -40,7 +52,7 @@ puts "Including #{tex_files.to_a} for compilation" if verbose
 
 # Detect magic-root comments
 magic_comment_matcher = /^\s*%\s*!\s*[Tt][Ee][xX]\s*root\s*=\s*(.*\.[Tt][Ee][xX]).*$/
-endroots_and_ancillary = tex_files.map do |file|
+roots_and_ancillary = tex_files.map do |file|
   content = File.read(file, encoding: 'UTF-8')
   match = content[magic_comment_matcher, 1]
   [file, match]
@@ -65,12 +77,12 @@ tex_roots = tex_roots.to_set
 puts "Detected the following LaTeX roots: #{tex_roots}" if verbose
 
 # Compile loop
-successes = Set[]
+successes = Set.new
 previous_successes = nil
-failures = Set[]
+failures = Set.new
 until successes == tex_roots || successes == previous_successes do
   previous_successes = successes.dup
-  failures = Set[]
+  failures = Set.new
   (tex_roots - successes).each do |root|
     Dir.chdir(File.dirname(root))
     puts "Compiling #{root} with: \"#{command} '#{root}'\""
@@ -88,11 +100,21 @@ end
 
 # Prepare outputs
 success_list = successes.map { |f| f.sub(initial_directory, '') }
-puts "::set-output name=successfully-compiled::#{success_list.join(',')}"
-puts "::set-output name=compiled-files::#{success_list.map { |file|
-  file.sub(/\.[Tt][Ee][Xx]?$/, '.pdf')
-}.join(',')}"
+pdf_list = success_list.map { |file| file.sub(/\.[Tt][Ee][Xx]?$/, '.pdf') }
 
+github_output = ENV['GITHUB_OUTPUT']
+if github_output
+  File.open(github_output, 'a') do |f|
+    f.puts("successfully-compiled=#{success_list.join(',')}")
+    f.puts("compiled-files=#{pdf_list.join(',')}")
+  end
+else
+  error('', "GITHUB_OUTPUT env variable not set; using deprecated set-output syntax.")
+  puts "::set-output name=successfully-compiled::#{success_list.join(',')}"
+  puts "::set-output name=compiled-files::#{pdf_list.join(',')}"
+end
+
+# Also expose list via environment variable if configured
 heredoc_delimiter = 'EOF'
 export = "#{output_variable}<<#{heredoc_delimiter}\n#{success_list.join("\n")}\n#{heredoc_delimiter}"
 puts 'Generated variable output:'
@@ -104,9 +126,9 @@ if !success_list.empty? && github_env
   File.open(github_env, 'a') { |env| env.puts(export) }
 end
 
-# Report failures as warnings
+# Report failures as errors
 failures.each do |file, output|
-  warn(file, "failed to compile, output:\n#{output}")
+  error(file, "failed to compile, output:\n#{output}")
 end
 
 exit failures.size
