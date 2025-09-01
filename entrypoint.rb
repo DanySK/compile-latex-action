@@ -40,7 +40,7 @@ puts "Found these tex files: #{tex_files}" if verbose
 # Exclude any .tex file that does not contain a \documentclass declaration
 filtered = []
 tex_files.each do |file|
-  content = File.read(file, encoding: 'UTF-8').lines.select { |it| !it.start_with?(/\R*%/) }
+  content = File.read(file, encoding: 'UTF-8').lines.reject { |it| it.match?(/^\s*%/) }
   if content.any? {|it| it =~ /\\documentclass/ }
     filtered << file
   else
