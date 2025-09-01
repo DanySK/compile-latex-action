@@ -40,8 +40,8 @@ puts "Found these tex files: #{tex_files}" if verbose
 # Exclude any .tex file that does not contain a \documentclass declaration
 filtered = []
 tex_files.each do |file|
-  content = File.read(file, encoding: 'UTF-8')
-  if content =~ /\\documentclass/
+  content = File.read(file, encoding: 'UTF-8').lines.select { |it| !it.start_with?(/\R*%/) }
+  if content.any? {|it| it =~ /\\documentclass/ }
     filtered << file
   else
     warn(file, "Excluded from compilation because it lacks a \\documentclass declaration.")
