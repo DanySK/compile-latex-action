@@ -21,6 +21,14 @@ jobs:
       contents: write
       packages: write
     steps:
+      - name: Maximize build space
+        uses: AdityaGarg8/remove-unwanted-software@v4.1
+        with:
+          remove-cached-tools: 'true'
+          remove-codeql: 'true'
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
       - name: Checkout
         uses: danysk/action-checkout@0.2.24
       - name: Check the test syntax
