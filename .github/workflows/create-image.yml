@@ -30,7 +30,7 @@ jobs:
           remove-android: 'true'
           remove-haskell: 'true'
       - name: Checkout
-        uses: danysk/action-checkout@0.2.24
+        uses: danysk/action-checkout@0.2.26
       - name: Check the test syntax
         run: ruby -c test.rb
       - name: Compute name
