@@ -13,19 +13,33 @@ inputs:
     required: false
     default: false
   success:
-    description: The name of the environment variable that will hold the list of correctly compiled files. Since GitHub Actions does not support multiline output, this action writes on a variable. 
+    description: The name of the environment variable that will hold the list of correctly compiled files. Since GitHub Actions does not support multiline output, this action writes on a variable.
     required: false
     default: LATEX_SUCCESSES
   outputs:
     successfully-compiled:
       description: "A comma-separated list of all successfully compiled files"
+      value: ${{ steps.compile.outputs.successfully-compiled }}
     compiled-files:
       description: "A comma-separated list of all the produced pdfs"
+      value: ${{ steps.compile.outputs.compiled-files }}
 
 runs:
-  using: "docker"
-  image: docker://danysk/compile-latex-action:2.1.4
-  args:
-    - ${{ inputs.command }}
-    - ${{ inputs.verbose }}
-    - ${{ inputs.success }}
+  using: "composite"
+  steps:
+    - name: Compile all LaTeX files
+      id: compile
+      shell: bash
+      run: >-
+        docker run --rm
+          --workdir="${GITHUB_WORKSPACE}"
+          -v "${GITHUB_ENV}:${GITHUB_ENV}"
+          -v "${GITHUB_WORKSPACE}:${GITHUB_WORKSPACE}:rw"
+          -v "${GITHUB_OUTPUT}:${GITHUB_OUTPUT}:rw"
+          -e CI
+          -e GITHUB_ENV
+          -e GITHUB_OUTPUT
+          danysk/compile-latex-action:2.1.4
+          ${{ inputs.command }}
+          ${{ inputs.verbose }}
+          ${{ inputs.success }}
