@@ -40,6 +40,6 @@ runs:
           -e GITHUB_ENV \
           -e GITHUB_OUTPUT \
           danysk/compile-latex-action:2.2.0 \
-          ${{ inputs.command }} \
-          ${{ inputs.verbose }} \
-          ${{ inputs.success }}
+          "${{ inputs.command }}" \
+          "${{ inputs.verbose }}" \
+          "${{ inputs.success }}"
