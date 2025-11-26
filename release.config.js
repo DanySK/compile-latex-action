@@ -20,7 +20,7 @@ config.plugins.push(
                 {
                     "files": ["action.yml"],
                     "from": "danysk\/compile-latex-action.*",
-                    "to": "danysk/compile-latex-action:${nextRelease.version}",
+                    "to": "danysk/compile-latex-action:${nextRelease.version} \\",
                     "results": [
                         {
                             "file": "action.yml",
