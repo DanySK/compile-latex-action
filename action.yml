@@ -34,7 +34,7 @@ runs:
     - name: Compile all LaTeX files
       id: compile
       env:
-        FORWARDED_ENV_VARS: ${{ inputs.env-vars }}
+        FORWARDED_ENV_VARS: ${{ inputs['env-vars'] }}
       shell: bash
       run: |
         EXTRA_ENV_ARGS=()
