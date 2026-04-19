@@ -69,6 +69,7 @@ jobs:
             echo "Delivering file $pdf"
             gh release upload "$TAG" "$pdf" --clobber
           done
+```
 
 ### Forward environment variables to the container
 
