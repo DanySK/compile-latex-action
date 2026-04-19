@@ -13,7 +13,7 @@ inputs:
     required: false
     default: false
   env-vars:
-    description: Comma-separated environment variable names to forward to the inner Docker container. Warning: forwarded variables are exposed to that container. Only forward trusted variables, and avoid passing secrets unless you trust the container image.
+    description: "Comma-separated environment variable names to forward to the inner Docker container. Warning: forwarded variables are exposed to that container. Only forward trusted variables, and avoid passing secrets unless you trust the container image."
     required: false
     default: ""
   success:
