@@ -45,6 +45,8 @@ jobs:
           echo docker build -t "$IMAGE_NAME:latest" .
           docker build -t "$IMAGE_NAME:latest" .
       - name: Run tests
+        env:
+          SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
         run: ./test.rb
       - name: Install Node
         uses: actions/setup-node@v6.3.0

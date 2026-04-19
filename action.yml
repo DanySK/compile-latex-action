@@ -12,6 +12,10 @@ inputs:
     description: Adds more output
     required: false
     default: false
+  env-vars:
+    description: Comma-separated environment variable names to forward to the inner Docker container. Warning: forwarded variables are exposed to that container. Only forward trusted variables, and avoid passing secrets unless you trust the container image.
+    required: false
+    default: ""
   success:
     description: The name of the environment variable that will hold the list of correctly compiled files. Since GitHub Actions does not support multiline output, this action writes on a variable.
     required: false
@@ -29,8 +33,23 @@ runs:
   steps:
     - name: Compile all LaTeX files
       id: compile
+      env:
+        FORWARDED_ENV_VARS: ${{ inputs['env-vars'] }}
       shell: bash
       run: |
+        EXTRA_ENV_ARGS=()
+        IFS=',' read -ra ENV_VARS <<< "$FORWARDED_ENV_VARS"
+        for raw_name in "${ENV_VARS[@]}"; do
+          name="$(printf '%s' "$raw_name" | xargs)"
+          if [[ -n "$name" ]]; then
+            if [[ ! "$name" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+              echo "Invalid forwarded environment variable name: '$name'. Only names matching ^[A-Za-z_][A-Za-z0-9_]*$ are allowed." >&2
+              exit 1
+            fi
+            EXTRA_ENV_ARGS+=("-e" "$name")
+          fi
+        done
+
         docker run --rm \
           --workdir="${GITHUB_WORKSPACE}" \
           -v "${GITHUB_ENV}:${GITHUB_ENV}" \
@@ -39,6 +58,7 @@ runs:
           -e CI \
           -e GITHUB_ENV \
           -e GITHUB_OUTPUT \
+          "${EXTRA_ENV_ARGS[@]}" \
           danysk/compile-latex-action:2.2.7 \
           "${{ inputs.command }}" \
           "${{ inputs.verbose }}" \
