@@ -12,6 +12,13 @@ Unless a file has a magic comment similar to `% ! TeX root = ...`,
 then it is interpreted as a LaTeX root document and its compilation is attempted.
 If the magic comment is found, then the value of the magic comment is also added to the list of files to be compiled.
 
+## Inputs
+
+- `command`: command used to compile each detected root document. Default: `rubber --unsafe --inplace -d --synctex -s -W all`
+- `verbose`: if `true`, prints additional diagnostic output. Default: `false`
+- `env-vars`: comma-separated environment variable names to forward to the inner Docker container. Only pass trusted variables, because forwarded values are exposed to the container. Default: empty
+- `success`: name of the multiline environment variable that receives the list of successfully compiled root documents. Default: `LATEX_SUCCESSES`
+
 ## Outputs
 
 A list of compiled files is produced and stored in the `LATEX_SUCCESSES` multi-line environment variable,
@@ -62,3 +69,16 @@ jobs:
             echo "Delivering file $pdf"
             gh release upload "$TAG" "$pdf" --clobber
           done
+
+### Forward environment variables to the container
+
+If your LaTeX build needs selected environment variables inside the container, pass their names through `env-vars`.
+
+```yaml
+- name: Compile LaTeX
+  uses: DanySK/compile-latex-action@master
+  with:
+    env-vars: SERPAPI_KEY
+  env:
+    SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
+```
