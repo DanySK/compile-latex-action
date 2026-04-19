@@ -34,6 +34,17 @@ jobs:
         with:
           fetch-depth: 0
           ssh-key: ${{ secrets.DEPLOY_KEY }}
+      - name: Verify SSH remote when deploy key is available
+        env:
+          DEPLOY_KEY_PRESENT: ${{ secrets.DEPLOY_KEY != '' }}
+        run: |
+          ORIGIN_URL="$(git remote get-url origin)"
+          echo "origin=$ORIGIN_URL"
+          if [[ "$DEPLOY_KEY_PRESENT" == "true" && ! "$ORIGIN_URL" =~ ^git@github\.com: ]]; then
+            echo "DEPLOY_KEY is available, but origin is not configured as an SSH remote." >&2
+            echo "semantic-release would push over HTTPS and miss the deploy-key branch-rule exception." >&2
+            exit 1
+          fi
       - name: Check the test syntax
         run: ruby -c test.rb
       - name: Compute name
