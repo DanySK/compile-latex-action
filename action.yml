@@ -40,7 +40,7 @@ runs:
         EXTRA_ENV_ARGS=()
         IFS=',' read -ra ENV_VARS <<< "$FORWARDED_ENV_VARS"
         for raw_name in "${ENV_VARS[@]}"; do
-          name="$(echo "$raw_name" | xargs)"
+          name="$(printf '%s' "$raw_name" | xargs)"
           if [[ -n "$name" ]]; then
             EXTRA_ENV_ARGS+=("-e" "$name")
           fi
