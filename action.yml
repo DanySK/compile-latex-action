@@ -42,6 +42,10 @@ runs:
         for raw_name in "${ENV_VARS[@]}"; do
           name="$(printf '%s' "$raw_name" | xargs)"
           if [[ -n "$name" ]]; then
+            if [[ ! "$name" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+              echo "Invalid forwarded environment variable name: '$name'. Only names matching ^[A-Za-z_][A-Za-z0-9_]*$ are allowed." >&2
+              exit 1
+            fi
             EXTRA_ENV_ARGS+=("-e" "$name")
           fi
         done
