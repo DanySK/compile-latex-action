@@ -33,10 +33,12 @@ runs:
   steps:
     - name: Compile all LaTeX files
       id: compile
+      env:
+        FORWARDED_ENV_VARS: ${{ inputs.env-vars }}
       shell: bash
       run: |
         EXTRA_ENV_ARGS=()
-        IFS=',' read -ra ENV_VARS <<< "${{ inputs.env-vars }}"
+        IFS=',' read -ra ENV_VARS <<< "$FORWARDED_ENV_VARS"
         for raw_name in "${ENV_VARS[@]}"; do
           name="$(echo "$raw_name" | xargs)"
           if [[ -n "$name" ]]; then
