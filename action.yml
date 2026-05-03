@@ -59,7 +59,7 @@ runs:
           -e GITHUB_ENV \
           -e GITHUB_OUTPUT \
           "${EXTRA_ENV_ARGS[@]}" \
-          danysk/compile-latex-action:2.3.2 \
+          danysk/compile-latex-action:2.3.3 \
           "${{ inputs.command }}" \
           "${{ inputs.verbose }}" \
           "${{ inputs.success }}"
